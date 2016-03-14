@@ -8,23 +8,38 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.eightleaves.popularmovie.data.MovieContract;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+import java.util.List;
 
-public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+
+public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, TasksInterface, View.OnClickListener {
     private static final int DETAIL_LOADER=1;
     private ImageView imageView;
     private TextView titleText;
     private TextView overviewText;
     private TextView ratingText;
     private TextView releaseDateText;
+    private RecyclerView trailersListView;
+    private RecyclerView reviewListView;
+    private TrailerAdapter trailerAdapter;
+    private ReviewAdapter reviewAdapter;
+    private List<Trailer> trailerList;
+    private List<Review> reviewList;
 
     static final int COL_MOVIE_ID = 0;
     static final int COL_MOVIE_MOVIE_ID = 1;
@@ -68,8 +83,29 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         overviewText = (TextView) rootView.findViewById(R.id.list_item_movie_overview);
         ratingText = (TextView) rootView.findViewById(R.id.list_item_movie_rating);
         releaseDateText = (TextView)rootView.findViewById(R.id.list_item_movie_year);
-
+        trailersListView = (RecyclerView)rootView.findViewById(R.id.list_item_movie_trailers_list);
+        reviewListView = (RecyclerView)rootView.findViewById(R.id.list_item_movie_reviews_list);
         return rootView;
+    }
+
+    private void setupTrailerRecyclerView() {
+        TrailerAdapter adapter = new TrailerAdapter(this.getContext(),trailerList);
+        trailersListView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+        /*This solution is taken To get Recycler View height dynamically
+        http://stackoverflow.com/questions/32337403/making-recyclerview-fixed-height-and-scrollable*/
+        trailersListView.setLayoutManager(new MyLinearLayoutManager(this.getContext(),1,false));
+        //trailersListView.setLayoutManager(new LinearLayoutManager(this.getContext()));
+    }
+
+    private void setupReviewRecyclerView() {
+        ReviewAdapter adapter = new ReviewAdapter(this.getContext(),reviewList);
+        reviewListView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+        /*This solution is taken To get Recycler View height dynamically
+        http://stackoverflow.com/questions/32337403/making-recyclerview-fixed-height-and-scrollable*/
+        reviewListView.setLayoutManager(new MyLinearLayoutManager(this.getContext(),1,false));
+        //trailersListView.setLayoutManager(new LinearLayoutManager(this.getContext()));
     }
 
 
@@ -98,11 +134,36 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             String imageUrl = Utility.getImageUrl(posterPath);
             Picasso.with(getActivity()).load(imageUrl)
                     .placeholder(R.mipmap.ic_launcher).into(imageView);
+            String movieId = String.valueOf(data.getLong(COL_MOVIE_MOVIE_ID));
+            FetchTrailersTask trailersTask = new FetchTrailersTask(getActivity(),this);
+            trailersTask.execute(movieId);
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
+    }
+
+    @Override
+    public void onTaskCompleted(List<Object> result) {
+        trailerList = (List)((TrailersResult)result.get(0)).getResults();
+        reviewList = (List)((ReviewResults)result.get(1)).getResults();
+        if(getActivity()!= null) {
+            if (!trailerList.isEmpty() && trailerList != null) {
+                setupTrailerRecyclerView();
+            }
+        }
+        if(getActivity()!= null) {
+            if (!trailerList.isEmpty() && trailerList != null) {
+                setupReviewRecyclerView();
+            }
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+         }
     }
 }

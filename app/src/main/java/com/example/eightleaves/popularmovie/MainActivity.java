@@ -13,7 +13,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mSortSetting = Utility.getPreferredSortSetting(this);
 
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {

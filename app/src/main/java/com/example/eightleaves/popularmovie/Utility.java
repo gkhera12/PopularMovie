@@ -23,4 +23,13 @@ class Utility {
         String size = "w185/";
         return baseUrl+size+posterPath;
     }
+
+    public static String getTrailerNumber(Context context,int position){
+        int formatId = R.string.format_trailer_number;
+        return String.format(context.getString(
+                formatId,
+                position));
+
+    }
 }
+
