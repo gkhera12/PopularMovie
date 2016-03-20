@@ -1,5 +1,8 @@
 package com.example.eightleaves.popularmovie;
 
+import android.app.ProgressDialog;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -8,26 +11,34 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.eightleaves.popularmovie.data.MovieContract;
+import com.example.eightleaves.popularmovie.event.EventExecutor;
+import com.example.eightleaves.popularmovie.event.GetReviewsResultEvent;
+import com.example.eightleaves.popularmovie.event.GetTrailersAndReviewsEvent;
+import com.example.eightleaves.popularmovie.event.GetTrailersResultEvent;
+import com.example.eightleaves.popularmovie.otto.MovieBus;
+import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
-public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, TasksInterface, View.OnClickListener {
+public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener{
     private static final int DETAIL_LOADER=1;
     private ImageView imageView;
     private TextView titleText;
@@ -40,6 +51,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private ReviewAdapter reviewAdapter;
     private List<Trailer> trailerList;
     private List<Review> reviewList;
+    private Button favoriteButton;
+    private Cursor mCursor;
+    private ProgressDialog movieProgressDialog;
+    private ShareActionProvider mShareActionProvider;
+    private Intent mShareIntent;
+    private EventExecutor executor;
 
     static final int COL_MOVIE_ID = 0;
     static final int COL_MOVIE_MOVIE_ID = 1;
@@ -64,8 +81,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     public DetailFragment() {
         // Required empty public constructor
+        MovieBus.getInstance().register(this);
     }
 
+    @Override
+    public void onDestroy(){
+        MovieBus.getInstance().unregister(this);
+        super.onDestroy();
+    }
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -76,7 +99,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
+        setHasOptionsMenu(true);
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
         imageView = (ImageView)rootView.findViewById(R.id.list_item_movie_image);
         titleText = (TextView) rootView.findViewById(R.id.list_item_movie_title);
@@ -85,27 +108,74 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         releaseDateText = (TextView)rootView.findViewById(R.id.list_item_movie_year);
         trailersListView = (RecyclerView)rootView.findViewById(R.id.list_item_movie_trailers_list);
         reviewListView = (RecyclerView)rootView.findViewById(R.id.list_item_movie_reviews_list);
+        favoriteButton = (Button)rootView.findViewById(R.id.list_item_movie_favorite);
+        favoriteButton.setOnClickListener(this);
+        movieProgressDialog = new ProgressDialog(getActivity());
+        movieProgressDialog.setTitle("Loading Trailers and Reviews");
+        movieProgressDialog.setMessage("Loading ..");
+        if(savedInstanceState == null){
+        movieProgressDialog.show();
+        }
+        executor = new EventExecutor(getContext());
         return rootView;
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
+        super.onCreateOptionsMenu(menu, inflater);
+        getActivity().getMenuInflater().inflate(R.menu.share_trailer, menu);
+        MenuItem item = menu.findItem(R.id.menu_item_share);
+
+        // Fetch and store ShareActionProvidermShareActionProvider = new ShareActionProvider();
+        mShareActionProvider = new ShareActionProvider(getContext());
+        MenuItemCompat.setActionProvider(item, mShareActionProvider);
+     //   mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.menu_item_share:
+                createShareIntent();
+
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void createShareIntent() {
+        mShareIntent = new Intent();
+        mShareIntent.setAction(Intent.ACTION_SEND);
+        mShareIntent.setType("text/plain");
+        mShareIntent.putExtra(Intent.EXTRA_TEXT,
+                Utility.formatLink(getContext(), trailerList.get(0).getKey()));
+        mShareActionProvider.setShareIntent(mShareIntent);
+    }
+
+
     private void setupTrailerRecyclerView() {
-        TrailerAdapter adapter = new TrailerAdapter(this.getContext(),trailerList);
-        trailersListView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
+        trailerAdapter = new TrailerAdapter(this.getContext(),trailerList);
+        trailersListView.setAdapter(trailerAdapter);
+
         /*This solution is taken To get Recycler View height dynamically
         http://stackoverflow.com/questions/32337403/making-recyclerview-fixed-height-and-scrollable*/
-        trailersListView.setLayoutManager(new MyLinearLayoutManager(this.getContext(),1,false));
-        //trailersListView.setLayoutManager(new LinearLayoutManager(this.getContext()));
+        trailersListView.setLayoutManager(new MyLinearLayoutManager(this.getContext(), 1, false));
+       // trailersListView.setLayoutManager(new LinearLayoutManager(this.getContext()));
+        trailerAdapter.notifyDataSetChanged();
     }
 
     private void setupReviewRecyclerView() {
-        ReviewAdapter adapter = new ReviewAdapter(this.getContext(),reviewList);
-        reviewListView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
+        reviewAdapter= new ReviewAdapter(this.getContext(),reviewList);
+        reviewListView.setAdapter(reviewAdapter);
+       // reviewAdapter.notifyDataSetChanged();
         /*This solution is taken To get Recycler View height dynamically
         http://stackoverflow.com/questions/32337403/making-recyclerview-fixed-height-and-scrollable*/
-        reviewListView.setLayoutManager(new MyLinearLayoutManager(this.getContext(),1,false));
-        //trailersListView.setLayoutManager(new LinearLayoutManager(this.getContext()));
+       reviewListView.setLayoutManager(new MyLinearLayoutManager(this.getContext(),1,false));
+        //reviewListView.setLayoutManager(new LinearLayoutManager(this.getContext()));
+        reviewAdapter.notifyDataSetChanged();
     }
 
 
@@ -122,12 +192,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if(data !=null && data.moveToFirst()) {
+            mCursor = data;
             String title = data.getString(COL_MOVIE_TITLE);
             titleText.setText(title);
             String overview = data.getString(COL_MOVIE_OVERVIEW);
             overviewText.setText(overview);
             String rating = data.getString(COL_MOVIE_RATING);
-            ratingText.setText(getContext().getString(R.string.format_rating,rating));
+            ratingText.setText(getContext().getString(R.string.format_rating, rating));
             String releaseDate = Utility.getYearFromDate(data.getString(COL_MOVIE_RELEASE_DATE));
             releaseDateText.setText(releaseDate);
             String posterPath = data.getString(COL_MOVIE_POSTER_PATH);
@@ -135,9 +206,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             Picasso.with(getActivity()).load(imageUrl)
                     .placeholder(R.mipmap.ic_launcher).into(imageView);
             String movieId = String.valueOf(data.getLong(COL_MOVIE_MOVIE_ID));
-            FetchTrailersTask trailersTask = new FetchTrailersTask(getActivity(),this);
-            trailersTask.execute(movieId);
+            getTrailersAndReviews(movieId);
         }
+    }
+
+    public void getTrailersAndReviews(String movieId){
+        GetTrailersAndReviewsEvent event = new GetTrailersAndReviewsEvent();
+        event.setMovieId(movieId);
+        executor.getTrailersAndReviews(event);
     }
 
     @Override
@@ -145,25 +221,91 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     }
 
-    @Override
-    public void onTaskCompleted(List<Object> result) {
-        trailerList = (List)((TrailersResult)result.get(0)).getResults();
-        reviewList = (List)((ReviewResults)result.get(1)).getResults();
-        if(getActivity()!= null) {
+    @Subscribe
+    public void getTrailersResult(GetTrailersResultEvent event){
+        trailerList = event.getTrailersResult().getResults();
+        if (getActivity() != null) {
             if (!trailerList.isEmpty() && trailerList != null) {
-                setupTrailerRecyclerView();
+                 setupTrailerRecyclerView();
             }
-        }
-        if(getActivity()!= null) {
-            if (!trailerList.isEmpty() && trailerList != null) {
-                setupReviewRecyclerView();
+        if(mShareActionProvider!=null && !trailerList.isEmpty()) {
+            createShareIntent();
+            mShareActionProvider.setShareIntent(mShareIntent);
             }
         }
     }
 
+    @Subscribe
+    public void getReviewsResult(GetReviewsResultEvent event){
+        reviewList = event.getReviewResults().getResults();
+        if (getActivity() != null) {
+            if (!reviewList.isEmpty() && reviewList != null) {
+                setupReviewRecyclerView();
+            }
+        }
+        movieProgressDialog.dismiss();
+    }
+
+
+    private long addSortSetting(String sortSetting) {
+        long sortSettingId;
+        Cursor cur = this.getContext().getContentResolver().query(
+                MovieContract.SortEntry.CONTENT_URI,
+                new String[]{MovieContract.SortEntry._ID},
+                MovieContract.SortEntry.COLUMN_SORT_SETTING + "=?",
+                new String[]{sortSetting},
+                null);
+
+        if (cur != null && cur.moveToFirst()) {
+            int sortIndex = cur.getColumnIndex(MovieContract.SortEntry._ID);
+            sortSettingId = cur.getLong(sortIndex);
+            cur.close();
+        } else {
+            ContentValues values = new ContentValues();
+            values.put(MovieContract.SortEntry.COLUMN_SORT_SETTING, sortSetting);
+
+            Uri sortSettingUri = this.getContext().getContentResolver().insert(
+                    MovieContract.SortEntry.CONTENT_URI, values);
+            sortSettingId = ContentUris.parseId(sortSettingUri);
+        }
+        return sortSettingId;
+    }
+
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
-         }
+        addAsFavorite();
+    }
+    private void addAsFavorite(){
+        Uri inserted = null;
+        String posterPath;
+        String overview;
+        String releaseDate;
+        String title;
+        String voteAverage;
+        String id;
+        String sortBy = "favorite";
+        long sortId = addSortSetting(sortBy);
+        posterPath =mCursor.getString(COL_MOVIE_POSTER_PATH);
+        overview = mCursor.getString(COL_MOVIE_OVERVIEW);
+        releaseDate = mCursor.getString(COL_MOVIE_RELEASE_DATE);
+        title = mCursor.getString(COL_MOVIE_TITLE);
+        voteAverage = mCursor.getString(COL_MOVIE_RATING);
+        id = mCursor.getString(COL_MOVIE_MOVIE_ID);
+
+        ContentValues movieValues = new ContentValues();
+
+        movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, id);
+        movieValues.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, posterPath);
+        movieValues.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, overview);
+        movieValues.put(MovieContract.MovieEntry.COLUMN_TITLE, title);
+        movieValues.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
+        movieValues.put(MovieContract.MovieEntry.COLUMN_SORT_KEY, sortId);
+        movieValues.put(MovieContract.MovieEntry.COLUMN_RATING, voteAverage);
+
+        inserted = this.getContext().getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, movieValues);
+        if(inserted != null)
+        {
+            Toast.makeText(this.getContext(),"Favourite Movie Added", Toast.LENGTH_SHORT).show();
+        }
     }
 }

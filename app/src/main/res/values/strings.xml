@@ -8,14 +8,16 @@
     <string name="pref_sort_key">sort_by</string>
     <string name="pref_sort_title">Sort Order</string>
     <string name="pref_sort_setting">Sort Order</string>
-    <string name="pref_sort_default">popular.desc</string>
+    <string name="pref_sort_default">popular</string>
     <string name="popular_movie">popular movie</string>
     <string name="format_rating"><xliff:g id="rating">%1$s</xliff:g>/10</string>
     <string name="read_reviews">Read All Reviews</string>
     <string name="trailer">Trailer</string>
     <string name="format_trailer_number">Trailer <xliff:g id="position">%1$s</xliff:g>
 </string>
+    <string name="format_youtube_link">%1$s%2$s</string>
     <string name="reviews">Reviews</string>
     <string name="trailers">Trailers</string>
+    <string name="youtube_link">http://www.youtube.com/watch?v=</string>
 
 </resources>

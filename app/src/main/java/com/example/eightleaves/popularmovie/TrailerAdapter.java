@@ -11,6 +11,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
 /**
@@ -55,6 +57,9 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(TrailerAdapter.ViewHolder holder, final int position) {
+        String imageUrl = "http://img.youtube.com/vi/"+mValues.get(position).getKey()+"/mqdefault.jpg";
+        Picasso.with(mContext).load(imageUrl)
+                .into(holder.mImageView);
         holder.mTextView.setText(Utility.getTrailerNumber(mContext,position+1));
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override

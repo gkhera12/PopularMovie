@@ -31,5 +31,11 @@ class Utility {
                 position));
 
     }
+
+    public static String formatLink(Context context, String key) {
+        int formatId = R.string.format_youtube_link;
+        String baseUrl = context.getResources().getString(R.string.youtube_link);
+        return String.format(context.getString(formatId, baseUrl,key));
+    }
 }
 

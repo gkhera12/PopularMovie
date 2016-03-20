@@ -80,8 +80,10 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     void onSortSettingChanged( ) {
-        updateMovie();
-        getLoaderManager().restartLoader(MOVIE_LOADER, null, this);
+        if(!Utility.getPreferredSortSetting(getContext()).equals("favorite")) {
+            updateMovie();
+        }
+            getLoaderManager().restartLoader(MOVIE_LOADER, null, this);
     }
 
 

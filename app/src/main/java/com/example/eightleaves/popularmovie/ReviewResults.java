@@ -117,4 +117,5 @@ public class ReviewResults {
         this.totalResults = totalResults;
     }
 
+
 }

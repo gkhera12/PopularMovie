@@ -26,12 +26,19 @@ public class MyLinearLayoutManager extends LinearLayoutManager {
         final int heightSize = View.MeasureSpec.getSize(heightSpec);
         int width = 0;
         int height = 0;
+
+
         for (int i = 0; i < getItemCount(); i++) {
-            measureScrapChild(recycler, i,
+
+            if (i >= state.getItemCount()) {
+                return;
+            }
+            if(0!= getItemCount()){
+                measureScrapChild(recycler, i,
                     View.MeasureSpec.makeMeasureSpec(i, View.MeasureSpec.UNSPECIFIED),
                     View.MeasureSpec.makeMeasureSpec(i, View.MeasureSpec.UNSPECIFIED),
                     mMeasuredDimension);
-
+            }
             if (getOrientation() == HORIZONTAL) {
                 width = width + mMeasuredDimension[0];
                 if (i == 0) {

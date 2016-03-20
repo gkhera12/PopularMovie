@@ -301,5 +301,4 @@ public class Movie {
     public void setVoteAverage(Double voteAverage) {
         this.voteAverage = voteAverage;
     }
-
 }

@@ -16,6 +16,7 @@ import java.util.Vector;
 
 import retrofit.RestAdapter;
 
+import retrofit.RetrofitError;
 import retrofit.converter.GsonConverter;
 
 /**
@@ -60,6 +61,7 @@ class FetchMovieTask extends AsyncTask<String,Void, Void> {
         restAdapter = new RestAdapter.Builder()
                 .setEndpoint(MOVIE_BASE_URL)
                 .setConverter(new GsonConverter(gson))
+                .setLogLevel(RestAdapter.LogLevel.FULL)
                 .build();
 
     }
@@ -67,10 +69,17 @@ class FetchMovieTask extends AsyncTask<String,Void, Void> {
             String sortBy = params[0];
             int numOfPage =1;
             MovieResults movieResults;
+            Log.d("Popular Movie","Starting task");
             MovieApiMethods movieApiMethods = restAdapter.create(MovieApiMethods.class);
-            movieResults = movieApiMethods.getMovieData(BuildConfig.THE_MOVIE_DB_API_KEY,
-                    sortBy,Integer.toString(numOfPage));
-            addMovieData(movieResults, sortBy);
+            try{
+                movieResults = movieApiMethods.getMovieData(sortBy,BuildConfig.THE_MOVIE_DB_API_KEY,
+                        Integer.toString(numOfPage));
+                addMovieData(movieResults, sortBy);
+            }catch(RetrofitError e)
+            {
+                Log.e("Popular Movie", "Error in getting the movie details");
+            }
+
             return null;
         }
 
@@ -102,7 +111,6 @@ class FetchMovieTask extends AsyncTask<String,Void, Void> {
             movieValues.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
             movieValues.put(MovieContract.MovieEntry.COLUMN_SORT_KEY, sortId);
             movieValues.put(MovieContract.MovieEntry.COLUMN_RATING, voteAverage);
-
             cVVector.add(movieValues);
         }
         int inserted = 0;
