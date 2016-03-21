@@ -3,9 +3,10 @@ package com.example.eightleaves.popularmovie.event;
 import android.content.Context;
 
 import com.example.eightleaves.popularmovie.BuildConfig;
-import com.example.eightleaves.popularmovie.MovieApiMethods;
-import com.example.eightleaves.popularmovie.ReviewResults;
-import com.example.eightleaves.popularmovie.TrailersResult;
+import com.example.eightleaves.popularmovie.models.MovieDataUpdator;
+import com.example.eightleaves.popularmovie.models.MovieResults;
+import com.example.eightleaves.popularmovie.models.ReviewResults;
+import com.example.eightleaves.popularmovie.models.TrailersResult;
 import com.example.eightleaves.popularmovie.otto.MovieBus;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -16,7 +17,6 @@ import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.converter.GsonConverter;
-import retrofit.http.GET;
 
 /**
  * Created by gkhera on 18/03/2016.
@@ -41,13 +41,31 @@ public class EventExecutor {
                 .build();
         //Implementation using Retrofit
         methods = restAdapter.create(MovieApiMethods.class);
-
     }
 
     @Subscribe
     public void getTrailersAndReviews(GetTrailersAndReviewsEvent event){
         getTrailers(event.getMovieId());
         getReviews(event.getMovieId());
+    }
+
+    @Subscribe
+    public void getMovieDataEvent(final GetMovieDataEvent event){
+        String pageNum ="1";
+        methods.getMovieData(event.sortBy, BuildConfig.THE_MOVIE_DB_API_KEY, pageNum, new Callback<MovieResults>() {
+            @Override
+            public void success(MovieResults movieResults, Response response) {
+                GetMovieDataResultEvent resultEvent = new GetMovieDataResultEvent();
+                resultEvent.setMovieResults(movieResults);
+                resultEvent.setSortBy(event.sortBy);
+                MovieBus.getInstance().post(resultEvent);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
+            }
+        });
     }
 
     private void getReviews(String movieId) {
@@ -83,4 +101,7 @@ public class EventExecutor {
         });
     }
 
+    public void onDestroy(){
+        MovieBus.getInstance().unregister(this);
+    }
 }

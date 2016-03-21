@@ -15,7 +15,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import com.example.eightleaves.popularmovie.adapters.MovieAdapter;
 import com.example.eightleaves.popularmovie.data.MovieContract;
+import com.example.eightleaves.popularmovie.event.EventExecutor;
+import com.example.eightleaves.popularmovie.event.GetMovieDataEvent;
+import com.example.eightleaves.popularmovie.models.MovieDataUpdator;
+import com.example.eightleaves.popularmovie.otto.MovieBus;
 
 
 public class MovieFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -23,11 +28,13 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
     private String[] results;
     private ProgressDialog movieProgressDialog;
     private MovieAdapter movieAdapter;
+    private EventExecutor executor;
+    private MovieDataUpdator movieDataUpdator;
     private static final int MOVIE_LOADER =0;
 
     static final int COL_MOVIE_ID = 0;
     private static final int COL_MOVIE_MOVIE_ID = 1;
-    static final int COL_MOVIE_POSTER_PATH = 2;
+    public static final int COL_MOVIE_POSTER_PATH = 2;
     static final int COL_MOVIE_TITLE = 3;
     static final int COL_MOVIE_RELEASE_DATE = 4;
     static final int COL_MOVIE_OVERVIEW = 5;
@@ -40,6 +47,7 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
 
     };
     public MovieFragment() {
+        MovieBus.getInstance().register(this);
     }
 
     @Override
@@ -72,6 +80,11 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
         return rootView;
     }
 
+    @Override
+    public void onDestroy(){
+        MovieBus.getInstance().unregister(this);
+        super.onDestroy();
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -88,9 +101,16 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
 
 
     private void updateMovie(){
-        FetchMovieTask movieTask = new FetchMovieTask(getActivity());
+        /*FetchMovieTask movieTask = new FetchMovieTask(getActivity());
         String sortBy = Utility.getPreferredSortSetting(getActivity());
-        movieTask.execute(sortBy);
+        movieTask.execute(sortBy);*/
+        executor = new EventExecutor(getContext());
+        movieDataUpdator = new MovieDataUpdator(getContext());
+        String sortBy = Utility.getPreferredSortSetting(getActivity());
+        GetMovieDataEvent getMovieDataEvent = new GetMovieDataEvent();
+        getMovieDataEvent.setSortBy(sortBy);
+        MovieBus.getInstance().post(getMovieDataEvent);
+
     }
 
     @Override

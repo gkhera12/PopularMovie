@@ -25,17 +25,22 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.eightleaves.popularmovie.adapters.ReviewAdapter;
+import com.example.eightleaves.popularmovie.adapters.TrailerAdapter;
 import com.example.eightleaves.popularmovie.data.MovieContract;
 import com.example.eightleaves.popularmovie.event.EventExecutor;
 import com.example.eightleaves.popularmovie.event.GetReviewsResultEvent;
 import com.example.eightleaves.popularmovie.event.GetTrailersAndReviewsEvent;
 import com.example.eightleaves.popularmovie.event.GetTrailersResultEvent;
+import com.example.eightleaves.popularmovie.event.MarkFavouriteEvent;
+import com.example.eightleaves.popularmovie.models.MovieDataUpdator;
+import com.example.eightleaves.popularmovie.models.Review;
+import com.example.eightleaves.popularmovie.models.Trailer;
 import com.example.eightleaves.popularmovie.otto.MovieBus;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
-import java.util.Objects;
 
 
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener{
@@ -57,6 +62,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private ShareActionProvider mShareActionProvider;
     private Intent mShareIntent;
     private EventExecutor executor;
+    private MovieDataUpdator movieDataUpdator;
 
     static final int COL_MOVIE_ID = 0;
     static final int COL_MOVIE_MOVIE_ID = 1;
@@ -82,6 +88,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public DetailFragment() {
         // Required empty public constructor
         MovieBus.getInstance().register(this);
+
     }
 
     @Override
@@ -116,7 +123,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         if(savedInstanceState == null){
         movieProgressDialog.show();
         }
-        executor = new EventExecutor(getContext());
+
         return rootView;
     }
 
@@ -211,9 +218,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     public void getTrailersAndReviews(String movieId){
+        movieDataUpdator = new MovieDataUpdator(getContext());
+        executor = new EventExecutor(getContext());
         GetTrailersAndReviewsEvent event = new GetTrailersAndReviewsEvent();
         event.setMovieId(movieId);
-        executor.getTrailersAndReviews(event);
+        MovieBus.getInstance().post(event);
     }
 
     @Override
@@ -273,39 +282,17 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onClick(View v) {
-        addAsFavorite();
+        movieDataUpdator = new MovieDataUpdator(getContext());
+        executor = new EventExecutor(getContext());
+        MarkFavouriteEvent event = new MarkFavouriteEvent();
+        event.setSortBy("favorite");
+        event.setPosterPath(mCursor.getString(COL_MOVIE_POSTER_PATH));
+        event.setOverview(mCursor.getString(COL_MOVIE_OVERVIEW));
+        event.setReleaseDate(mCursor.getString(COL_MOVIE_RELEASE_DATE));
+        event.setTitle(mCursor.getString(COL_MOVIE_TITLE));
+        event.setVoteAverage(mCursor.getString(COL_MOVIE_RATING));
+        event.setId(mCursor.getString(COL_MOVIE_MOVIE_ID));
+        MovieBus.getInstance().post(event);
     }
-    private void addAsFavorite(){
-        Uri inserted = null;
-        String posterPath;
-        String overview;
-        String releaseDate;
-        String title;
-        String voteAverage;
-        String id;
-        String sortBy = "favorite";
-        long sortId = addSortSetting(sortBy);
-        posterPath =mCursor.getString(COL_MOVIE_POSTER_PATH);
-        overview = mCursor.getString(COL_MOVIE_OVERVIEW);
-        releaseDate = mCursor.getString(COL_MOVIE_RELEASE_DATE);
-        title = mCursor.getString(COL_MOVIE_TITLE);
-        voteAverage = mCursor.getString(COL_MOVIE_RATING);
-        id = mCursor.getString(COL_MOVIE_MOVIE_ID);
 
-        ContentValues movieValues = new ContentValues();
-
-        movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, id);
-        movieValues.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, posterPath);
-        movieValues.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, overview);
-        movieValues.put(MovieContract.MovieEntry.COLUMN_TITLE, title);
-        movieValues.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
-        movieValues.put(MovieContract.MovieEntry.COLUMN_SORT_KEY, sortId);
-        movieValues.put(MovieContract.MovieEntry.COLUMN_RATING, voteAverage);
-
-        inserted = this.getContext().getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, movieValues);
-        if(inserted != null)
-        {
-            Toast.makeText(this.getContext(),"Favourite Movie Added", Toast.LENGTH_SHORT).show();
-        }
-    }
 }

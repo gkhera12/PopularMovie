@@ -77,7 +77,8 @@
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
                     android:text="Mark as Favourite"
-                    android:background="@color/title_layout_background" />
+                    android:background="@color/title_layout_background"
+                    android:gravity="center_vertical|center_horizontal" />
 
             </LinearLayout>
         </LinearLayout>
