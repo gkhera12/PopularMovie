@@ -44,6 +44,8 @@ import java.util.List;
 
 
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener{
+    static final String DETAIL_URI = "URI";
+    private Uri mUri;
     private static final int DETAIL_LOADER=1;
     private ImageView imageView;
     private TextView titleText;
@@ -105,6 +107,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            mUri = arguments.getParcelable(DetailFragment.DETAIL_URI);
+        }
         // Inflate the layout for this fragment
         setHasOptionsMenu(true);
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
@@ -188,12 +194,17 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Intent intent = getActivity().getIntent();
-        if(intent ==null){
-            return null;
+        if ( null != mUri ) {
+            return new CursorLoader(
+                    getActivity(),
+                    mUri,
+                    MOVIE_DETAIL_COLUMNS,
+                    null,
+                    null,
+                    null
+            );
         }
-        Uri mUri = Uri.parse(intent.getDataString());
-        return new CursorLoader(getActivity(), mUri,MOVIE_DETAIL_COLUMNS,null,null,null);
+        return null;
     }
 
     @Override
@@ -295,4 +306,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         MovieBus.getInstance().post(event);
     }
 
+    public void onSortSettingChanged(String sortSetting) {
+        Uri uri = mUri;
+        if(null != uri){
+            long movieId =  MovieContract.MovieEntry.getMovieIdFromUri(uri);
+            Uri updatedUri = MovieContract.MovieEntry.buildMovieSortWithMovieId(sortSetting,movieId);
+            mUri = updatedUri;
+            getLoaderManager().restartLoader(DETAIL_LOADER,null,this);
+        }
+    }
 }

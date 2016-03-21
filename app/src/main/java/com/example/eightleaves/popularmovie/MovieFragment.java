@@ -46,6 +46,10 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
 
 
     };
+    public interface Callback {
+        public void onItemSelected(Uri Uri);
+    }
+
     public MovieFragment() {
         MovieBus.getInstance().register(this);
     }
@@ -70,11 +74,10 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
                 String sortby = Utility.getPreferredSortSetting(getContext());
-                Intent intent = new Intent(getActivity(), DetailActivity.class)
-                        .setData(MovieContract.MovieEntry.buildMovieSortWithMovieId(
+                ((Callback) getActivity())
+                        .onItemSelected(MovieContract.MovieEntry.buildMovieSortWithMovieId(
                                 sortby, cursor.getInt(COL_MOVIE_MOVIE_ID)
                         ));
-                startActivity(intent);
             }
         });
         return rootView;

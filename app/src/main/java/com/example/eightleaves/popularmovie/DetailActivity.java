@@ -15,9 +15,12 @@ public class DetailActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.detail_container, new DetailFragment())
+        if(savedInstanceState == null)
+        {
+            getSupportFragmentManager().beginTransaction()
+                .replace(R.id.movie_detail_container, new DetailFragment())
                 .commit();
+        }
     }
 
     @Override
