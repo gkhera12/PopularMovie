@@ -12,7 +12,7 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity implements MovieFragment.Callback {
     private String mSortSetting;
-    private static final String MOVIEFRAGMENT_TAG = "MFTAG";
+    private static final String DETAILFRAGMENT_TAG = "DFTAG";
     private boolean mTwoPane;
 
     @Override
@@ -27,8 +27,9 @@ public class MainActivity extends AppCompatActivity implements MovieFragment.Cal
             mTwoPane = true;
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.movie_detail_container, new DetailFragment(),MOVIEFRAGMENT_TAG)
-                        .commit();
+                    .replace(R.id.movie_detail_container, new DetailFragment(),DETAILFRAGMENT_TAG)
+
+                    .commit();
             }
         }else{
             mTwoPane = false;
@@ -44,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements MovieFragment.Cal
             if ( null != ff ) {
                 ff.onSortSettingChanged();
             }
-            DetailFragment df = (DetailFragment)getSupportFragmentManager().findFragmentByTag(MOVIEFRAGMENT_TAG);
+            DetailFragment df = (DetailFragment)getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
             if ( null != df ) {
                 df.onSortSettingChanged(sortSetting);
             }
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements MovieFragment.Cal
             DetailFragment fragment = new DetailFragment();
             fragment.setArguments(args);
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.movie_detail_container, fragment, MOVIEFRAGMENT_TAG)
+                    .replace(R.id.movie_detail_container, fragment, DETAILFRAGMENT_TAG)
                     .commit();
         } else {
             Intent intent = new Intent(this, DetailActivity.class)

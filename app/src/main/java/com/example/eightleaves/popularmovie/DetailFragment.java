@@ -60,7 +60,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private List<Review> reviewList;
     private Button favoriteButton;
     private Cursor mCursor;
-    private ProgressDialog movieProgressDialog;
     private ShareActionProvider mShareActionProvider;
     private Intent mShareIntent;
     private EventExecutor executor;
@@ -123,13 +122,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         reviewListView = (RecyclerView)rootView.findViewById(R.id.list_item_movie_reviews_list);
         favoriteButton = (Button)rootView.findViewById(R.id.list_item_movie_favorite);
         favoriteButton.setOnClickListener(this);
-        movieProgressDialog = new ProgressDialog(getActivity());
-        movieProgressDialog.setTitle("Loading Trailers and Reviews");
-        movieProgressDialog.setMessage("Loading ..");
-        if(savedInstanceState == null){
-        movieProgressDialog.show();
-        }
-
         return rootView;
     }
 
@@ -263,7 +255,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 setupReviewRecyclerView();
             }
         }
-        movieProgressDialog.dismiss();
     }
 
 

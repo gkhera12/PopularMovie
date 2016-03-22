@@ -25,6 +25,10 @@ public class MovieAdapter extends CursorAdapter {
     public MovieAdapter(Context context,Cursor cursor) {
         super(context,cursor);
     }
+    private int mItemSelected = -1 ;
+    public void setItemSelected(int position){
+        mItemSelected=position;
+    }
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
@@ -37,11 +41,15 @@ public class MovieAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
+        if(mItemSelected==cursor.getPosition()){
+            view.setActivated(true);
+        }else{
+            view.setActivated(false);
+        }
         ViewHolder viewHolder = (ViewHolder)view.getTag();
         String imageUrl = Utility.getImageUrl(cursor.getString(MovieFragment.COL_MOVIE_POSTER_PATH));
         Picasso.with(context).load(imageUrl)
                     .into(viewHolder.imageView);
-
     }
 
     public static class ViewHolder {

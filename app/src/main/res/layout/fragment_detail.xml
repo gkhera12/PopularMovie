@@ -76,7 +76,7 @@
                     android:id="@+id/list_item_movie_favorite"
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
-                    android:text="Mark as Favourite"
+                    android:text="@string/favorite_movie"
                     android:background="@color/title_layout_background"
                     android:gravity="center_vertical|center_horizontal" />
 

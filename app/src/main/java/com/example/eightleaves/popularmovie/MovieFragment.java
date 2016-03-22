@@ -9,11 +9,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ListView;
 
 import com.example.eightleaves.popularmovie.adapters.MovieAdapter;
 import com.example.eightleaves.popularmovie.data.MovieContract;
@@ -31,6 +33,10 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
     private EventExecutor executor;
     private MovieDataUpdator movieDataUpdator;
     private static final int MOVIE_LOADER =0;
+    private GridView mGridView;
+    private int mPosition = mGridView.INVALID_POSITION;
+    private static final String SELECTED_KEY = "selected_position";
+    private View rootView;
 
     static final int COL_MOVIE_ID = 0;
     private static final int COL_MOVIE_MOVIE_ID = 1;
@@ -61,15 +67,15 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
         movieAdapter = new MovieAdapter(getActivity(),null);
         movieAdapter.notifyDataSetChanged();
 
-        View rootView = inflater.inflate(R.layout.movie_fragment, container, false);
-        GridView gridView = (GridView) rootView.findViewById(R.id.gridview);
+        rootView = inflater.inflate(R.layout.movie_fragment, container, false);
+        mGridView = (GridView) rootView.findViewById(R.id.gridview);
         movieProgressDialog = new ProgressDialog(getActivity());
         movieProgressDialog.setTitle("Loading Posters");
         movieProgressDialog.setMessage("Loading ..");
         movieProgressDialog.show();
-        gridView.setAdapter(movieAdapter);
+        mGridView.setAdapter(movieAdapter);
 
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
@@ -78,8 +84,12 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
                         .onItemSelected(MovieContract.MovieEntry.buildMovieSortWithMovieId(
                                 sortby, cursor.getInt(COL_MOVIE_MOVIE_ID)
                         ));
+                mPosition = position;
             }
         });
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
+            mPosition = savedInstanceState.getInt(SELECTED_KEY);
+        }
         return rootView;
     }
 
@@ -87,6 +97,14 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
     public void onDestroy(){
         MovieBus.getInstance().unregister(this);
         super.onDestroy();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+     if (mPosition != GridView.INVALID_POSITION) {
+         outState.putInt(SELECTED_KEY, mPosition);
+     }
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -131,6 +149,9 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         movieProgressDialog.hide();
         movieAdapter.swapCursor(data);
+        if (mPosition != ListView.INVALID_POSITION) {
+            mGridView.smoothScrollToPosition(mPosition);
+        }
     }
 
     @Override
