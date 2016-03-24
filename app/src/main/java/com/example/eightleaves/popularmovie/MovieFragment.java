@@ -1,7 +1,6 @@
 package com.example.eightleaves.popularmovie;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,34 +8,32 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.eightleaves.popularmovie.adapters.MovieAdapter;
 import com.example.eightleaves.popularmovie.data.MovieContract;
 import com.example.eightleaves.popularmovie.event.EventExecutor;
 import com.example.eightleaves.popularmovie.event.GetMovieDataEvent;
+import com.example.eightleaves.popularmovie.event.MovieUpdateSuccessEvent;
 import com.example.eightleaves.popularmovie.models.MovieDataUpdator;
 import com.example.eightleaves.popularmovie.otto.MovieBus;
+import com.squareup.otto.Subscribe;
 
 
 public class MovieFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private String[] results;
     private ProgressDialog movieProgressDialog;
     private MovieAdapter movieAdapter;
-    private EventExecutor executor;
-    private MovieDataUpdator movieDataUpdator;
     private static final int MOVIE_LOADER =0;
     private GridView mGridView;
     private int mPosition = mGridView.INVALID_POSITION;
     private static final String SELECTED_KEY = "selected_position";
-    private View rootView;
 
     static final int COL_MOVIE_ID = 0;
     private static final int COL_MOVIE_MOVIE_ID = 1;
@@ -53,7 +50,7 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
 
     };
     public interface Callback {
-        public void onItemSelected(Uri Uri);
+        void onItemSelected(Uri Uri);
     }
 
     public MovieFragment() {
@@ -67,7 +64,7 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
         movieAdapter = new MovieAdapter(getActivity(),null);
         movieAdapter.notifyDataSetChanged();
 
-        rootView = inflater.inflate(R.layout.movie_fragment, container, false);
+        View rootView = inflater.inflate(R.layout.movie_fragment, container, false);
         mGridView = (GridView) rootView.findViewById(R.id.gridview);
         movieProgressDialog = new ProgressDialog(getActivity());
         movieProgressDialog.setTitle("Loading Posters");
@@ -111,6 +108,7 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(MOVIE_LOADER, null, this);
+
     }
 
     void onSortSettingChanged( ) {
@@ -118,15 +116,13 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
             updateMovie();
         }
             getLoaderManager().restartLoader(MOVIE_LOADER, null, this);
+        mPosition = GridView.INVALID_POSITION;
     }
 
 
     private void updateMovie(){
-        /*FetchMovieTask movieTask = new FetchMovieTask(getActivity());
-        String sortBy = Utility.getPreferredSortSetting(getActivity());
-        movieTask.execute(sortBy);*/
-        executor = new EventExecutor(getContext());
-        movieDataUpdator = new MovieDataUpdator(getContext());
+        EventExecutor executor = new EventExecutor(getContext());
+        MovieDataUpdator movieDataUpdator = new MovieDataUpdator(getContext());
         String sortBy = Utility.getPreferredSortSetting(getActivity());
         GetMovieDataEvent getMovieDataEvent = new GetMovieDataEvent();
         getMovieDataEvent.setSortBy(sortBy);
@@ -148,8 +144,12 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         movieProgressDialog.hide();
+        if(data == null || data.getCount()==0){
+            Toast.makeText(getContext(),"No data available, Try changing the Sort Order",
+                    Toast.LENGTH_SHORT).show();
+        }
         movieAdapter.swapCursor(data);
-        if (mPosition != ListView.INVALID_POSITION) {
+        if (mPosition != GridView.INVALID_POSITION) {
             mGridView.smoothScrollToPosition(mPosition);
         }
     }
@@ -158,4 +158,24 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
     public void onLoaderReset(Loader<Cursor> loader) {
         movieAdapter.swapCursor(null);
     }
+
+   @Subscribe
+    public void getMovieUpdateEvent(MovieUpdateSuccessEvent event){
+       View detailsFrame = getActivity().findViewById(R.id.movie_detail_container);
+       Boolean mDualPane;
+       mDualPane = detailsFrame != null
+               && detailsFrame.getVisibility() == View.VISIBLE;
+       String sortby = Utility.getPreferredSortSetting(getContext());
+        if (mDualPane && mPosition == GridView.INVALID_POSITION ){
+           mGridView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+           Cursor cursor = (Cursor) movieAdapter.getItem(0);
+
+           ((Callback) getActivity())
+                   .onItemSelected(MovieContract.MovieEntry.buildMovieSortWithMovieId(
+                           sortby, cursor.getInt(COL_MOVIE_MOVIE_ID)
+                   ));
+           mPosition = 0;
+       }
+    }
+
 }

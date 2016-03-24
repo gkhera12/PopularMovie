@@ -16,7 +16,7 @@ public class MovieResults {
     private Integer page;
     @SerializedName("results")
     @Expose
-    private List<Movie> results = new ArrayList<Movie>();
+    private List<Movie> results = new ArrayList<>();
     @SerializedName("total_results")
     @Expose
     private Integer totalResults;

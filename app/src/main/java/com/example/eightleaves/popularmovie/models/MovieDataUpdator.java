@@ -11,6 +11,7 @@ import android.widget.Toast;
 import com.example.eightleaves.popularmovie.data.MovieContract;
 import com.example.eightleaves.popularmovie.event.GetMovieDataResultEvent;
 import com.example.eightleaves.popularmovie.event.MarkFavouriteEvent;
+import com.example.eightleaves.popularmovie.event.MovieUpdateSuccessEvent;
 import com.example.eightleaves.popularmovie.otto.MovieBus;
 import com.squareup.otto.Subscribe;
 
@@ -30,6 +31,7 @@ public class MovieDataUpdator {
     @Subscribe
     public void updateMovieData(GetMovieDataResultEvent event){
         addMovieData(event.getMovieResults(), event.getSortBy());
+        MovieBus.getInstance().post(new MovieUpdateSuccessEvent());
     }
 
     private long addSortSetting(String sortSetting) {

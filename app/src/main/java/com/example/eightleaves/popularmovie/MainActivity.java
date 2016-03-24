@@ -14,7 +14,7 @@ public class MainActivity extends AppCompatActivity implements MovieFragment.Cal
     private String mSortSetting;
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
     private boolean mTwoPane;
-
+    private static final String SORTING_KEY = "sort_setting";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +33,9 @@ public class MainActivity extends AppCompatActivity implements MovieFragment.Cal
             }
         }else{
             mTwoPane = false;
+        }
+        if (savedInstanceState != null && savedInstanceState.containsKey(SORTING_KEY)) {
+            mSortSetting = savedInstanceState.getString(SORTING_KEY);
         }
     }
 
@@ -53,6 +56,12 @@ public class MainActivity extends AppCompatActivity implements MovieFragment.Cal
         }
 
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString(SORTING_KEY, mSortSetting);
+        super.onSaveInstanceState(outState);
     }
 
     @Override

@@ -4,7 +4,6 @@ package com.example.eightleaves.popularmovie.models;
  * Created by gkhera on 8/03/16.
  */
 import java.util.ArrayList;
-import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -17,7 +16,7 @@ public class TrailersResult {
     private Integer id;
     @SerializedName("results")
     @Expose
-    private List<Trailer> results = new ArrayList<Trailer>();
+    private ArrayList<Trailer> results = new ArrayList<>();
 
     /**
      *
@@ -42,7 +41,7 @@ public class TrailersResult {
      * @return
      * The results
      */
-    public List<Trailer> getResults() {
+    public ArrayList<Trailer> getResults() {
         return results;
     }
 
@@ -51,7 +50,7 @@ public class TrailersResult {
      * @param results
      * The results
      */
-    public void setResults(List<Trailer> results) {
+    public void setResults(ArrayList<Trailer> results) {
         this.results = results;
     }
 

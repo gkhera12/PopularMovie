@@ -16,7 +16,6 @@ import java.util.List;
  * Created by gkhera on 11/03/2016.
  */
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder> {
-    private final  Context mContext;
     private List<Review> mValues;
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -37,7 +36,6 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
 
     public ReviewAdapter(Context context, List<Review> items) {
         mValues = items;
-        mContext = context;
     }
 
     @Override
@@ -45,8 +43,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
 
         View reviewView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_review, parent, false);
-        ViewHolder viewHolder = new ViewHolder(reviewView);
-        return viewHolder;
+        return new ViewHolder(reviewView);
     }
 
     public Review getValueAt(int position) {

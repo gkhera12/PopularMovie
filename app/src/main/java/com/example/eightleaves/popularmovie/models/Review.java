@@ -1,12 +1,15 @@
 package com.example.eightleaves.popularmovie.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by gkhera on 8/03/16.
  */
-public class Review {
+public class Review implements Parcelable{
     @SerializedName("id")
     @Expose
     private String id;
@@ -19,6 +22,13 @@ public class Review {
     @SerializedName("url")
     @Expose
     private String url;
+
+    private Review(Parcel in){
+        id = in.readString();
+        author = in.readString();
+        content = in.readString();
+        url = in.readString();
+    }
 
     /**
      *
@@ -91,4 +101,30 @@ public class Review {
     public void setUrl(String url) {
         this.url = url;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(author);
+        dest.writeString(content);
+        dest.writeString(url);
+    }
+
+    public final Parcelable.Creator<Review> CREATOR = new Parcelable.Creator<Review>() {
+        @Override
+        public Review createFromParcel(Parcel parcel) {
+            return new Review(parcel);
+        }
+
+        @Override
+        public Review[] newArray(int i) {
+            return new Review[i];
+        }
+
+    };
 }

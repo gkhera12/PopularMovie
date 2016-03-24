@@ -1,12 +1,15 @@
 package com.example.eightleaves.popularmovie.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by gkhera on 8/03/16.
  */
-public class Trailer {
+public class Trailer implements Parcelable{
     @SerializedName("id")
     @Expose
     private String id;
@@ -28,6 +31,17 @@ public class Trailer {
     @SerializedName("type")
     @Expose
     private String type;
+
+
+    private Trailer(Parcel in){
+        id = in.readString();
+        iso6391 = in.readString();
+        key = in.readString();
+        name = in.readString();
+        site = in.readString();
+        size = in.readInt();
+        type = in.readString();
+    }
 
     /**
      *
@@ -155,4 +169,32 @@ public class Trailer {
         this.type = type;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(iso6391);
+        dest.writeString(key);
+        dest.writeString(name);
+        dest.writeString(site);
+        dest.writeInt(size);
+        dest.writeString(type);
+    }
+
+    public final Parcelable.Creator<Trailer> CREATOR = new Parcelable.Creator<Trailer>() {
+        @Override
+        public Trailer createFromParcel(Parcel parcel) {
+            return new Trailer(parcel);
+        }
+
+        @Override
+        public Trailer[] newArray(int i) {
+            return new Trailer[i];
+        }
+
+    };
 }

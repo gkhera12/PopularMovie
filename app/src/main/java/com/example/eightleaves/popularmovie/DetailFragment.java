@@ -1,6 +1,5 @@
 package com.example.eightleaves.popularmovie;
 
-import android.app.ProgressDialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -23,7 +22,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.eightleaves.popularmovie.adapters.ReviewAdapter;
 import com.example.eightleaves.popularmovie.adapters.TrailerAdapter;
@@ -40,7 +38,7 @@ import com.example.eightleaves.popularmovie.otto.MovieBus;
 import com.squareup.otto.Subscribe;
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
+import java.util.ArrayList;
 
 
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener{
@@ -54,16 +52,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView releaseDateText;
     private RecyclerView trailersListView;
     private RecyclerView reviewListView;
-    private TrailerAdapter trailerAdapter;
-    private ReviewAdapter reviewAdapter;
-    private List<Trailer> trailerList;
-    private List<Review> reviewList;
-    private Button favoriteButton;
+    private ArrayList<Trailer> trailerList;
+    private ArrayList<Review> reviewList;
     private Cursor mCursor;
     private ShareActionProvider mShareActionProvider;
     private Intent mShareIntent;
     private EventExecutor executor;
     private MovieDataUpdator movieDataUpdator;
+    private static final String TRAILERS_KEY = "trailers";
+    private static final String REVIEWS_KEY = "reviews";
 
     static final int COL_MOVIE_ID = 0;
     static final int COL_MOVIE_MOVIE_ID = 1;
@@ -120,9 +117,24 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         releaseDateText = (TextView)rootView.findViewById(R.id.list_item_movie_year);
         trailersListView = (RecyclerView)rootView.findViewById(R.id.list_item_movie_trailers_list);
         reviewListView = (RecyclerView)rootView.findViewById(R.id.list_item_movie_reviews_list);
-        favoriteButton = (Button)rootView.findViewById(R.id.list_item_movie_favorite);
+        Button favoriteButton = (Button) rootView.findViewById(R.id.list_item_movie_favorite);
         favoriteButton.setOnClickListener(this);
+
+        if(savedInstanceState != null && savedInstanceState.containsKey(TRAILERS_KEY)
+                && savedInstanceState.containsKey(REVIEWS_KEY)){
+            trailerList = savedInstanceState.getParcelableArrayList(TRAILERS_KEY);
+            reviewList = savedInstanceState.getParcelableArrayList(REVIEWS_KEY);
+            setupReviewRecyclerView();
+            setupTrailerRecyclerView();
+        }
         return rootView;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(TRAILERS_KEY, trailerList);
+        outState.putParcelableArrayList(REVIEWS_KEY, reviewList);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -134,8 +146,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         // Fetch and store ShareActionProvidermShareActionProvider = new ShareActionProvider();
         mShareActionProvider = new ShareActionProvider(getContext());
         MenuItemCompat.setActionProvider(item, mShareActionProvider);
-     //   mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
-
+             //   mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
     }
 
     @Override
@@ -162,7 +173,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
 
     private void setupTrailerRecyclerView() {
-        trailerAdapter = new TrailerAdapter(this.getContext(),trailerList);
+        TrailerAdapter trailerAdapter = new TrailerAdapter(this.getContext(), trailerList);
         trailersListView.setAdapter(trailerAdapter);
 
         /*This solution is taken To get Recycler View height dynamically
@@ -173,7 +184,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     private void setupReviewRecyclerView() {
-        reviewAdapter= new ReviewAdapter(this.getContext(),reviewList);
+        ReviewAdapter reviewAdapter = new ReviewAdapter(this.getContext(), reviewList);
         reviewListView.setAdapter(reviewAdapter);
        // reviewAdapter.notifyDataSetChanged();
         /*This solution is taken To get Recycler View height dynamically
@@ -216,11 +227,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             Picasso.with(getActivity()).load(imageUrl)
                     .placeholder(R.mipmap.ic_launcher).into(imageView);
             String movieId = String.valueOf(data.getLong(COL_MOVIE_MOVIE_ID));
-            getTrailersAndReviews(movieId);
+            if(trailerList == null || reviewList == null){
+                getTrailersAndReviews(movieId);
+            }
         }
     }
 
-    public void getTrailersAndReviews(String movieId){
+    private void getTrailersAndReviews(String movieId){
         movieDataUpdator = new MovieDataUpdator(getContext());
         executor = new EventExecutor(getContext());
         GetTrailersAndReviewsEvent event = new GetTrailersAndReviewsEvent();
@@ -298,11 +311,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     public void onSortSettingChanged(String sortSetting) {
-        Uri uri = mUri;
-        if(null != uri){
-            long movieId =  MovieContract.MovieEntry.getMovieIdFromUri(uri);
-            Uri updatedUri = MovieContract.MovieEntry.buildMovieSortWithMovieId(sortSetting,movieId);
-            mUri = updatedUri;
+        if(null != mUri){
+            long movieId =  MovieContract.MovieEntry.getMovieIdFromUri(mUri);
+            mUri = MovieContract.MovieEntry.buildMovieSortWithMovieId(sortSetting,movieId);
             getLoaderManager().restartLoader(DETAIL_LOADER,null,this);
         }
     }

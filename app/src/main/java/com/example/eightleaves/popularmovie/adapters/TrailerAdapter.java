@@ -49,8 +49,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
 
         View trailerView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_trailer, parent, false);
-        ViewHolder viewHolder = new ViewHolder(trailerView);
-        return viewHolder;
+        return new ViewHolder(trailerView);
     }
 
     public Trailer getValueAt(int position) {

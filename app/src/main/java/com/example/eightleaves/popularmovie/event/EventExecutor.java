@@ -3,7 +3,6 @@ package com.example.eightleaves.popularmovie.event;
 import android.content.Context;
 
 import com.example.eightleaves.popularmovie.BuildConfig;
-import com.example.eightleaves.popularmovie.models.MovieDataUpdator;
 import com.example.eightleaves.popularmovie.models.MovieResults;
 import com.example.eightleaves.popularmovie.models.ReviewResults;
 import com.example.eightleaves.popularmovie.models.TrailersResult;
@@ -22,19 +21,16 @@ import retrofit.converter.GsonConverter;
  * Created by gkhera on 18/03/2016.
  */
 public class EventExecutor {
-    private Context context;
-    private RestAdapter restAdapter;
     private MovieApiMethods methods;
     final String MOVIE_BASE_URL = "http://api.themoviedb.org/3";
     public EventExecutor(Context context){
-        this.context = context;
         MovieBus.getInstance().register(this);
         Gson gson = new GsonBuilder()
                 .disableHtmlEscaping()
                 .setPrettyPrinting()
                 .serializeNulls()
                 .create();
-        restAdapter = new RestAdapter.Builder()
+        RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint(MOVIE_BASE_URL)
                 .setConverter(new GsonConverter(gson))
                 .setLogLevel(RestAdapter.LogLevel.FULL)

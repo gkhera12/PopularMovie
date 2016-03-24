@@ -5,7 +5,6 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by gkhera on 8/03/16.
@@ -20,7 +19,7 @@ public class ReviewResults {
     private Integer page;
     @SerializedName("results")
     @Expose
-    private List<Review> results = new ArrayList<Review>();
+    private ArrayList<Review> results = new ArrayList<>();
     @SerializedName("total_pages")
     @Expose
     private Integer totalPages;
@@ -69,7 +68,7 @@ public class ReviewResults {
      * @return
      * The results
      */
-    public List<Review> getResults() {
+    public ArrayList<Review> getResults() {
         return results;
     }
 
@@ -78,7 +77,7 @@ public class ReviewResults {
      * @param results
      * The results
      */
-    public void setResults(List<Review> results) {
+    public void setResults(ArrayList<Review> results) {
         this.results = results;
     }
 
