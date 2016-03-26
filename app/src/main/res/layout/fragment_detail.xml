@@ -19,7 +19,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="24sp"
             android:id="@+id/list_item_movie_title"
             android:gravity="center_vertical"
             android:textColor="@color/title_text_color"
@@ -54,7 +54,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
                     android:id="@+id/list_item_movie_year" />
 
                 <TextView
@@ -69,14 +69,14 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:id="@+id/list_item_movie_rating"
-                    android:textStyle="bold" />
+                    android:textColor="@android:color/black" />
 
                 <Button
                     android:id="@+id/list_item_movie_favorite"
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
                     android:text="@string/favorite_movie"
-                    android:paddingTop="@dimen/detail_fragment_padding"
+                    android:layout_marginTop="@dimen/layout_margin"
                     android:background="@color/title_layout_background"
                     android:gravity="center_vertical|center_horizontal" />
 
@@ -90,30 +90,28 @@
             android:id="@+id/list_item_movie_overview"
             android:layout_margin="@dimen/layout_margin" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray"/>
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="12dp">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"/>
             <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/trailers" />
-        <android.support.v7.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/list_item_movie_trailers_list"
-            />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/trailers" />
+
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/list_item_movie_trailers_list" />
+
         </LinearLayout>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
+
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"

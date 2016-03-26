@@ -1,4 +1,4 @@
-package com.example.eightleaves.popularmovie.models;
+package com.example.eightleaves.popularmovie.models.data;
 
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -8,10 +8,11 @@ import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.eightleaves.popularmovie.data.MovieContract;
 import com.example.eightleaves.popularmovie.event.GetMovieDataResultEvent;
 import com.example.eightleaves.popularmovie.event.MarkFavouriteEvent;
 import com.example.eightleaves.popularmovie.event.MovieUpdateSuccessEvent;
+import com.example.eightleaves.popularmovie.models.Movie;
+import com.example.eightleaves.popularmovie.models.MovieResults;
 import com.example.eightleaves.popularmovie.otto.MovieBus;
 import com.squareup.otto.Subscribe;
 

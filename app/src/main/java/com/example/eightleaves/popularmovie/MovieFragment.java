@@ -17,11 +17,11 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.eightleaves.popularmovie.adapters.MovieAdapter;
-import com.example.eightleaves.popularmovie.data.MovieContract;
+import com.example.eightleaves.popularmovie.models.data.MovieContract;
 import com.example.eightleaves.popularmovie.event.EventExecutor;
 import com.example.eightleaves.popularmovie.event.GetMovieDataEvent;
 import com.example.eightleaves.popularmovie.event.MovieUpdateSuccessEvent;
-import com.example.eightleaves.popularmovie.models.MovieDataUpdator;
+import com.example.eightleaves.popularmovie.models.data.MovieDataUpdator;
 import com.example.eightleaves.popularmovie.otto.MovieBus;
 import com.squareup.otto.Subscribe;
 
@@ -115,7 +115,7 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
         if(!Utility.getPreferredSortSetting(getContext()).equals("favorite")) {
             updateMovie();
         }
-            getLoaderManager().restartLoader(MOVIE_LOADER, null, this);
+        getLoaderManager().restartLoader(MOVIE_LOADER, null, this);
         mPosition = GridView.INVALID_POSITION;
     }
 

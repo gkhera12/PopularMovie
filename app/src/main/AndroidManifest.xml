@@ -13,7 +13,7 @@
         android:theme="@style/AppTheme" >
         <provider
             android:authorities="com.example.eightleaves.popularmovie"
-            android:name=".data.MovieProvider">
+            android:name=".models.data.MovieProvider">
         </provider>
         <activity android:name=".MainActivity" >
             <intent-filter>
@@ -33,7 +33,8 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity" >
+            android:theme="@style/SettingsTheme"
+            android:parentActivityName="com.example.eightleaves.popularmovie.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.eightleaves.popularmovie.MainActivity" />

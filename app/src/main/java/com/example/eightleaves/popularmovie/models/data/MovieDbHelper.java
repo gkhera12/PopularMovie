@@ -1,10 +1,10 @@
-package com.example.eightleaves.popularmovie.data;
+package com.example.eightleaves.popularmovie.models.data;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import com.example.eightleaves.popularmovie.data.MovieContract.MovieEntry;
-import com.example.eightleaves.popularmovie.data.MovieContract.SortEntry;
+import com.example.eightleaves.popularmovie.models.data.MovieContract.MovieEntry;
+import com.example.eightleaves.popularmovie.models.data.MovieContract.SortEntry;
 /**
  * Created by gkhera on 19/02/2016.
  */

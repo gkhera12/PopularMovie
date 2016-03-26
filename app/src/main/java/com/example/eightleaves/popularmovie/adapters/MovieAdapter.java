@@ -19,15 +19,9 @@ import com.squareup.picasso.Picasso;
  * Created by gkhera on 17/02/2016.
  */
 public class MovieAdapter extends CursorAdapter {
-    private String[] results;
-    private Context context;
 
     public MovieAdapter(Context context,Cursor cursor) {
         super(context,cursor);
-    }
-    private int mItemSelected = -1 ;
-    public void setItemSelected(int position){
-        mItemSelected=position;
     }
 
     @Override
@@ -41,11 +35,6 @@ public class MovieAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        if(mItemSelected==cursor.getPosition()){
-            view.setActivated(true);
-        }else{
-            view.setActivated(false);
-        }
         ViewHolder viewHolder = (ViewHolder)view.getTag();
         String imageUrl = Utility.getImageUrl(cursor.getString(MovieFragment.COL_MOVIE_POSTER_PATH));
         Picasso.with(context).load(imageUrl)
@@ -59,6 +48,5 @@ public class MovieAdapter extends CursorAdapter {
             imageView = (ImageView) view.findViewById(R.id.list_item_movie_image);
         }
     }
-
 
 }

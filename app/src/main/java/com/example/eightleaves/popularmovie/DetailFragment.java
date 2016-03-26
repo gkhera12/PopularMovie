@@ -25,13 +25,13 @@ import android.widget.TextView;
 
 import com.example.eightleaves.popularmovie.adapters.ReviewAdapter;
 import com.example.eightleaves.popularmovie.adapters.TrailerAdapter;
-import com.example.eightleaves.popularmovie.data.MovieContract;
+import com.example.eightleaves.popularmovie.models.data.MovieContract;
 import com.example.eightleaves.popularmovie.event.EventExecutor;
 import com.example.eightleaves.popularmovie.event.GetReviewsResultEvent;
 import com.example.eightleaves.popularmovie.event.GetTrailersAndReviewsEvent;
 import com.example.eightleaves.popularmovie.event.GetTrailersResultEvent;
 import com.example.eightleaves.popularmovie.event.MarkFavouriteEvent;
-import com.example.eightleaves.popularmovie.models.MovieDataUpdator;
+import com.example.eightleaves.popularmovie.models.data.MovieDataUpdator;
 import com.example.eightleaves.popularmovie.models.Review;
 import com.example.eightleaves.popularmovie.models.Trailer;
 import com.example.eightleaves.popularmovie.otto.MovieBus;
@@ -297,17 +297,20 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onClick(View v) {
+
         movieDataUpdator = new MovieDataUpdator(getContext());
         executor = new EventExecutor(getContext());
         MarkFavouriteEvent event = new MarkFavouriteEvent();
         event.setSortBy("favorite");
-        event.setPosterPath(mCursor.getString(COL_MOVIE_POSTER_PATH));
-        event.setOverview(mCursor.getString(COL_MOVIE_OVERVIEW));
-        event.setReleaseDate(mCursor.getString(COL_MOVIE_RELEASE_DATE));
-        event.setTitle(mCursor.getString(COL_MOVIE_TITLE));
-        event.setVoteAverage(mCursor.getString(COL_MOVIE_RATING));
-        event.setId(mCursor.getString(COL_MOVIE_MOVIE_ID));
-        MovieBus.getInstance().post(event);
+        if(!mCursor.isClosed()){
+            event.setPosterPath(mCursor.getString(COL_MOVIE_POSTER_PATH));
+            event.setOverview(mCursor.getString(COL_MOVIE_OVERVIEW));
+            event.setReleaseDate(mCursor.getString(COL_MOVIE_RELEASE_DATE));
+            event.setTitle(mCursor.getString(COL_MOVIE_TITLE));
+            event.setVoteAverage(mCursor.getString(COL_MOVIE_RATING));
+            event.setId(mCursor.getString(COL_MOVIE_MOVIE_ID));
+            MovieBus.getInstance().post(event);
+        }
     }
 
     public void onSortSettingChanged(String sortSetting) {

@@ -1,4 +1,4 @@
-package com.example.eightleaves.popularmovie.data;
+package com.example.eightleaves.popularmovie.models.data;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;

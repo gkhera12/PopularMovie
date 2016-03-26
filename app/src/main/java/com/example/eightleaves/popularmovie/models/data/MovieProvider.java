@@ -1,4 +1,4 @@
-package com.example.eightleaves.popularmovie.data;
+package com.example.eightleaves.popularmovie.models.data;
 
 import android.annotation.TargetApi;
 import android.content.ContentProvider;

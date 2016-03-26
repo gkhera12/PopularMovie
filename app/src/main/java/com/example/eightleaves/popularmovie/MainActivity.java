@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-//import com.facebook.stetho.Stetho;
 
 public class MainActivity extends AppCompatActivity implements MovieFragment.Callback {
     private String mSortSetting;
@@ -19,10 +18,7 @@ public class MainActivity extends AppCompatActivity implements MovieFragment.Cal
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-  //      Stetho.initializeWithDefaults(this);
         setContentView(R.layout.activity_main);
-
-
         if (findViewById(R.id.movie_detail_container) != null) {
             mTwoPane = true;
             if (savedInstanceState == null) {

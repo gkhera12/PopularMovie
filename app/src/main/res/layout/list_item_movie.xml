@@ -8,6 +8,7 @@
         android:layout_height="@dimen/image_layout_height"
         android:scaleType="fitXY"
         android:id="@+id/list_item_movie_image"
-        android:src="@mipmap/ic_launcher"/>
+        android:src="@mipmap/ic_launcher"
+        android:contentDescription="@string/popular_movie"/>
 
 </LinearLayout>

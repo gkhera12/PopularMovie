@@ -67,8 +67,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
             public void onClick(View v) {
                 Context context = v.getContext();
                 context.startActivity(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("http://www.youtube.com/watch?v=" + mValues.get(position).getKey())));
-
+                        Uri.parse(Utility.formatLink(context,mValues.get(position).getKey()))));
             }
         });
 
