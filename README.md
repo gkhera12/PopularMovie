@@ -11,8 +11,8 @@ Api key for this app to work can be got from https://www.themoviedb.org/document
 - RecyclerView
 
 ### First Screen
-![Alt text](https://github.com/gkhera12/PopularMovie/blob/master/screenshots/FirstScreen.png)
+<img src="https://github.com/gkhera12/PopularMovie/blob/master/screenshots/FirstScreen.png" width="200" height="400">
 
 ### Detail Page
-![Alt text](https://github.com/gkhera12/PopularMovie/blob/master/screenshots/DetailPage.png)
-![Alt text](https://github.com/gkhera12/PopularMovie/blob/master/screenshots/DetailPagei2.png)
+<img src="https://github.com/gkhera12/PopularMovie/blob/master/screenshots/DetailPage.png" width="200" height="400">
+<img src="https://github.com/gkhera12/PopularMovie/blob/master/screenshots/DetailPagei2.png width="200" height="400">
